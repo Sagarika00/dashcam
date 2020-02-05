@@ -4,14 +4,21 @@ The project will show a demo on a screen such that people can analyse its benefi
 
 ### Videos for ALPR
 
+[https://video-assets-dashcam.s3-website.eu-west-2.amazonaws.com/ALPR-detection-1.mp4](https://video-assets-dashcam.s3-website.eu-west-2.amazonaws.com/ALPR-detection-1.mp4)
 
+[https://video-assets-dashcam.s3-website.eu-west-2.amazonaws.com/ALPR-detection-2.mp4](https://video-assets-dashcam.s3-website.eu-west-2.amazonaws.com/ALPR-detection-2.mp4)
 
 ### Videos for Text Recognition
 
+[https://video-assets-dashcam.s3-website.eu-west-2.amazonaws.com/Text-detection-1.mp4](https://video-assets-dashcam.s3-website.eu-west-2.amazonaws.com/Text-detection-1.mp4)
 
+[https://video-assets-dashcam.s3-website.eu-west-2.amazonaws.com/Text-detection-2.mp4](https://video-assets-dashcam.s3-website.eu-west-2.amazonaws.com/Text-detection-2.mp4)
 
 ### Videos for Vehicle Detection
 
+[https://video-assets-dashcam.s3-website.eu-west-2.amazonaws.com/Vehicle-detection-1.mp4](https://video-assets-dashcam.s3-website.eu-west-2.amazonaws.com/Vehicle-detection-1.mp4)
+
+[https://video-assets-dashcam.s3-website.eu-west-2.amazonaws.com/Vehicle-detection-2.mp4](https://video-assets-dashcam.s3-website.eu-west-2.amazonaws.com/Vehicle-detection-2.mp4)
 
 ## Warning System
 
