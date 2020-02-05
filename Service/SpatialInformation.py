@@ -3,7 +3,7 @@ import numpy as np
 from scipy.spatial.distance import euclidean
 import ImageSegmentationService
 
-class SpatialInformationService():
+class SpatialInformation():
 
     classes = "../../voc_classes/object_detection_classes_pascal_voc.txt"
     object_classes = ['car', 'bus', 'motorbike', 'bicycle']

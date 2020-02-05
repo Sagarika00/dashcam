@@ -1,4 +1,4 @@
-class LicensePlateIdentifierService():
+class LicensePlateIdentifier():
 
     def __init__(self, frame, alpr):
         self.frame = frame
