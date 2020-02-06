@@ -4,10 +4,14 @@
 #include <vector>
 #include "alpr.h"
 #include <opencv2/opencv.hpp>
-#include <opencv2/videoio/videoio_c.h>
-#include <opencv2/imgproc/imgproc_c.h>
+// #include <opencv2/videoio/videoio_c.h>
+// #include <opencv2/imgproc/imgproc_c.h>
 
 using namespace alpr;
+
+#define CONFIG_FILENAME "/home/aswin/Documents/Courses/Udacity/Intel-Edge/Work/EdgeApp/License_Plate_Recognition/Dashcam-project/ALPR/conf/gb.conf"
+#define COUNTRY "gb"
+#define REGION "md"
 
 class ALPRImageDetect {
 
@@ -19,16 +23,16 @@ private:
     alpr::Alpr* instance;
     alpr::AlprResults results;
 
+public:
+
     struct LicensePlate {
         std::string plateText;
         float confidence;
         bool match;
     };
 
-public:
-
     const std::string extension = "jpg";
-    static const float OVERALL_CONFIDENCE = 0.5f;
+    static constexpr float OVERALL_CONFIDENCE = 0.5f;
 
     ALPRImageDetect(cv::Mat i_image, std::string i_config, std::string i_country, std::string i_region)
     {
@@ -119,3 +123,15 @@ public:
     }
 
 };
+
+int main(int argc, char * argv[]) {
+
+    cv::Mat image = cv::imread("plate.png");
+    
+    ALPRImageDetect alprdetect(image, CONFIG_FILENAME, COUNTRY, REGION);
+
+    std::vector<std::tuple<int, int, int, int>> regions { std::make_tuple(0,0,image.size().width,image.size().height) };
+    
+    std::vector<ALPRImageDetect::LicensePlate> licensePlates = alprdetect.detectLicensePlateMatches(10,regions);
+
+}
