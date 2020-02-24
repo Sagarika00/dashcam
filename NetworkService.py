@@ -76,7 +76,7 @@ class NetworkService:
         '''
         statuses = []
         for request_id, request in self.infer_requests.items():
-            statis.append(request.wait(self.delay))
+            statuses.append(request.wait(self.delay))
         
         return statuses
 

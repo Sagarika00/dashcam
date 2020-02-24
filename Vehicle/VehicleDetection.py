@@ -1,14 +1,12 @@
 import cv2
 import sys
 sys.path.append("../")
-import NetworkService
+from NetworkService import NetworkService
 
 class VehicleDetection(NetworkService):
 
-    def __init__(self, model_xml, inference_core, inference_network, executable_network, weights_bin=None, 
-    delay=-1, confidence_threshold=0.4, thickness=3, color=(0,0,255)):
+    def __init__(self, delay=-1, confidence_threshold=0.4, thickness=3, color=(0,0,255)):
         super(VehicleDetection).__init__()
-        self.load_model(model_xml)
         self.delay = delay
         self.confidence_threshold = confidence_threshold
         self.thickness = thickness

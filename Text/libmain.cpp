@@ -47,11 +47,6 @@
 using namespace std;
 using namespace cv;
 
-namespace bp = boost::python;
-namespace np = boost::python::numpy;
-
-typedef cv::Mat3f Ttype;
-
 #include  <vector>
 #include  <iostream>
 #include  <iomanip>
@@ -67,30 +62,6 @@ namespace np = boost::python::numpy;
 #define ERGROUPING_CLASSIFIER "./trained_classifier_erGrouping.xml"
 #define OCRHMM_KNN_MODEL "./OCRHMM_knn_model_data.xml.gz"
 #define OCRHMM_TRANSITIONS_TABLE "./OCRHMM_transitions_table.xml"
-
-int obtainHMMDecoder(cv::Mat image, const cv::String& filename, std::string& output_text, 
-    vector<cv::Rect>* boxes, vector<string>* words, vector<float>* confidences, const std::string& transition_filename) {
-
-    cv::Ptr<cv::text::OCRHMMDecoder::ClassifierCallback> hmm = cv::text::loadOCRHMMClassifierNM(filename);
-
-    // character recognition vocabulary
-    cv::String voc = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
-    cv::Mat transition_probabilities;
-    cv::Mat emission_probabilities = cv::Mat::eye((int)voc.size(), (int)voc.size(), CV_64FC1);
-
-    cv::FileStorage fs(OCRHMM_TRANSITIONS_TABLE, cv::FileStorage::READ);
-    fs["transition_probabilities"] >> transition_probabilities;
-    fs.release();
-
-    cv::Ptr<cv::text::OCRHMMDecoder> ocrNM  = cv::text::OCRHMMDecoder::create(hmm, voc, 
-    transition_probabilities, emission_probabilities, cv::text::OCR_DECODER_VITERBI);
-
-    ocrNM->run(image, output_text, boxes, words, confidences, cv::text::OCR_LEVEL_TEXTLINE);
-
-    return 0;
-
-}
 
 int obtainBeamSearchDecoder(cv::Mat image, const cv::String& filename, std::string& output_text, 
     vector<cv::Rect>* boxes, vector<string>* words, vector<float>* confidences) {
@@ -172,7 +143,6 @@ BOOST_PYTHON_MODULE(libmain) {
   bp::class_<TextDetection>("TextDetection")
       .def(bp::init<np::ndarray>())
       .def("Run_Filters", &TextDetection::Run_Filters)
-      .def("HMMDecode", &TextDetection::TextRecognition_HMMDecode)
       .def("BeamSearchDecode", &TextDetection::Beam_Search);
 
   import_array1();
