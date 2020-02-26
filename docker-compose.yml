@@ -2,5 +2,6 @@ version: '3'
 services:
   openalpr:
     build: https://github.com/openalpr/openalpr.git
+    container_name: openalpr
     ports:
       - "5000:5000"
