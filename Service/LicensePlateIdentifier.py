@@ -20,6 +20,20 @@ class LicensePlateIdentifier():
         
         return plate, confidence
 
+    def extract_plates(self):
+        i = 0
+        plates = []
+        confidences = []
+        print(self.results['vehicle_region'])
+        for plate in self.results['results']:
+            i += 1
+            for candidate in plate['candidates']:
+                plates.append(candidate['plate'])
+                confidences.append(candidate['confidence'])
+                break
+        
+        return plates, confidences
+
     def get_plate_information(self, plate):
         dvla_memory_tag = [plate[0], plate[1]]
         age_identifier = [plate[2], plate[3]]

@@ -7,6 +7,7 @@ from mpi4py.futures import MPIPoolExecutor
 import NetworkService
 from Vehicle import VehicleDetection
 from Service import VideoCapture
+from VideoCapture import VideoCapture
 import pdb
 
 LIB_TEXT_DETECTION = "./libs/text_detection.so"
