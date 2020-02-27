@@ -1,0 +1,51 @@
+import python ;
+import option ;
+import feature ;
+
+if ! gcc in [ feature.values <toolset> ]
+{
+    using gcc ; 
+}
+
+project : default-build <toolset>gcc ;
+
+#if ! [ python.configured ]
+#{
+    #using python : 3.6 
+    #: /home/aswin/Documents/Courses/Udacity/Intel-Edge/Repository/Python-3.6.1/python
+    #: /home/aswin/Documents/Courses/Udacity/Intel-Edge/Repository/Python-3.6.1/Include
+    #: /home/aswin/Documents/Courses/Udacity/Intel-Edge/Repository/Python-3.6.1 ;
+    #using python : 2.7
+    #: /usr/bin/python2.7 
+    #: /usr/include/python2.7/ 
+    #: /usr/local ;
+    
+#}
+
+libraries =  --with-python ;
+
+# These settings are equivivalent to corresponding command-line
+# options.
+#option.set prefix : /usr/local ;
+#option.set exec-prefix : /usr/local ;
+#option.set libdir :  ;
+#option.set includedir : /usr/local/include ;
+
+path-constant ICU_PATH : /usr ;
+
+
+# List of --with-<library> and --without-<library>
+# options. If left empty, all libraries will be built.
+# Options specified on the command line completely
+# override this variable.
+libraries =  --with-python ;
+
+# These settings are equivivalent to corresponding command-line
+# options.
+option.set prefix : /usr ;
+option.set exec-prefix : /usr/local ;
+option.set libdir : stage/lib/ ;
+option.set includedir : /usr/local/include ;
+
+# Stop on first error
+option.set keep-going : false ;

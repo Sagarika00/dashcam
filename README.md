@@ -22,6 +22,11 @@ The third is the random characters assigned to the registered vehicle
 
 An example of the license plate recognition task has been provided below
 
+How to execute the App
+----------------------
+
+python dashcam.py --video Text-detection-1.mp4
+
 
 
 ### Videos for ALPR
