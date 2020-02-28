@@ -12,24 +12,49 @@ run apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libopencv-dev \
     libtesseract-dev \
     wget \
+    python2.7 \
+    python2.7-dev \
     python3 \
-    python3-dev
+    python3-dev -y
+
+run apt-get install libgstreamer1.0-0 gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly \
+    gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools gstreamer1.0-x \
+    gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 \
+    gstreamer1.0-pulseaudio -y
 
 run wget https://bootstrap.pypa.io/get-pip.py
 
 run python3 get-pip.py
 
-pip3 install --user mpi4py PyGObject pycairo gTTS opencv-python numpy
-
-run apt-get install python3-gi python3-gi-cairo gir1.2-gtk-3.0 build-essential \
-    cmake unzip pkg-config libjpeg-dev libpng-dev libtiff-dev libjasper1 libjasper-dev \
+run apt-get install python3-gi python3-gi-cairo python3-cairo \
+    python3-cairo-dev gir1.2-gtk-3.0 build-essential \
+    python-gobject \
+    python-gobject-2-dev \
+    python-gi-cairo python-gi-dev \
+    python-gi \
+    cmake unzip pkg-config libjpeg-dev libpng-dev libtiff-dev \
     libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
     libxvidcore-dev libx264-dev \
     libgtk-3-dev \
-    libatlas-base-dev gfortran
+    software-properties-common \
+    libatlas-base-dev gfortran -y
 
-
+# install MPI
+run apt-get install libcr-dev mpich python3-mpi4py -y
 run add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-security main"
+
+# run pip install --user mpi4py PyGObject pycairo gTTS opencv-python numpy
+
+# run mkdir /home/mpi4py
+# workdir /home/mpi4py
+
+# run curl -Lso - https://bitbucket.org/mpi4py/mpi4py/downloads/mpi4py-3.0.3.tar.gz | tar -zxf - > /dev/null
+# run ls
+# workdir /home/mpi4py/mpi4py-3.0.3
+# run python3 setup.py install --user
+
+run pip install --user gTTS opencv-python numpy mpi4py
 
 # run mkdir /home/opencv
 
@@ -43,7 +68,7 @@ run add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-security ma
 
 # run wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/3.4.4.zip
 
-run apt-get install libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-3.0
+run apt-get install libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-3.0 -y
 
 RUN mkdir /home/openalpr
 workdir /home/openalpr
@@ -77,8 +102,6 @@ RUN mkdir /var/run/sshd
 # workdir /home/boost
 
 # RUN git clone https://github.com/boostorg/boost
-
-
 
 copy . /home/dashcam
 RUN sed -i 's/PermitRootLogin without-password/PermitRootLogin yes PasswordAuthentication yes PermitEmptyPasswords no/' /etc/ssh/sshd_config
