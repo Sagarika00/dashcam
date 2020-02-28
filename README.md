@@ -63,17 +63,9 @@ The GIS Service Layer also contains an MQTT service which delivers the usable in
 
 ALPR uses character detection region based models and metadata models in the `runtime_data/region` and `runtime_data/config` directories respectively. 
 
-Text detection uses Extremal Regions to extract text regions from the Gaussian Filters. 
+Text detection uses Beam Search to extract text information from the Gaussian Filters. 
 
 The Index layer contains a metadata index about journey information obtained from the GIS service layer.
-
-### Text Detection on Dashcam Video
-
-Using Extremal Region Filter for the 2nd stage classifier of N&M algorithm Neumann L., Matas J., `Text/libmain.cpp` infers bounding boxes from the gaussian filter applied to the video. 
-
-An example of text detection has been provided here:
-
-[Car Text Detected](./scripts/image_text.png)
 
 ## Services available
 
