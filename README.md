@@ -73,7 +73,7 @@ Using Extremal Region Filter for the 2nd stage classifier of N&M algorithm Neuma
 
 An example of text detection has been provided here:
 
-[Car Text Detected](./scripts/image_text.png)
+![Car Text Detected](./scripts/image_text.png)
 
 ## Services available
 
