@@ -103,7 +103,6 @@ RUN mkdir /var/run/sshd
 
 # RUN git clone https://github.com/boostorg/boost
 
-copy . /home/dashcam
 RUN sed -i 's/PermitRootLogin without-password/PermitRootLogin yes PasswordAuthentication yes PermitEmptyPasswords no/' /etc/ssh/sshd_config
 
 # SSH login fix. Otherwise user is kicked off after login

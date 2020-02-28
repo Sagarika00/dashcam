@@ -1,5 +1,6 @@
 import sys
 sys.path.append("../")
+sys.path.append("/home/openalpr/openalpr/src/bindings/python")
 from Service.LicensePlateIdentifier import LicensePlateIdentifier
 from openalpr import Alpr
 from Service.VideoCapture import VideoCapture
@@ -23,6 +24,7 @@ def get_video(args):
 if __name__ == "__main__":
     cap, out = get_video(parse_args())
     alpr = Alpr("us", "../ALPR/alpr_config/runtime_data/us.conf", "../ALPR/alpr_config/runtime_data")
+    print(alpr)
     if not alpr.is_loaded():
         print("Error loading OpenALPR")
         sys.exit(1)

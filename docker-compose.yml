@@ -5,3 +5,5 @@ services:
     container_name: openalpr
     ports:
       - "5679:5678"
+    volumes:
+      - .:/home/dashcam
