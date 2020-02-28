@@ -13,7 +13,6 @@ class VideoCapture(object):
         pass
 
     def create_capture(self):
-        print(self.video_source)
         self.cap = cv2.VideoCapture(self.video_source)
 
     def create_output(self, fps=30.0, size=(200,200), source=None):
