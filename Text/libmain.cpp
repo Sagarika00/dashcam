@@ -68,37 +68,7 @@ namespace np = boost::python::numpy;
 #define OCRHMM_KNN_MODEL "./OCRHMM_knn_model_data.xml.gz"
 #define OCRHMM_TRANSITIONS_TABLE "./OCRHMM_transitions_table.xml"
 
-int obtainHMMDecoder(cv::Mat image, const cv::String& filename, std::string& output_text, 
-    vector<cv::Rect>* boxes, vector<string>* words, vector<float>* confidences, const std::string& transition_filename) {
-
-    cv::Ptr<cv::text::OCRHMMDecoder::ClassifierCallback> hmm = cv::text::loadOCRHMMClassifierNM(filename);
-
-    // character recognition vocabulary
-    cv::String voc = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
-    cv::Mat transition_probabilities;
-    cv::Mat emission_probabilities = cv::Mat::eye((int)voc.size(), (int)voc.size(), CV_64FC1);
-
-    cv::FileStorage fs(OCRHMM_TRANSITIONS_TABLE, cv::FileStorage::READ);
-    fs["transition_probabilities"] >> transition_probabilities;
-    fs.release();
-
-    cv::Ptr<cv::text::OCRHMMDecoder> ocrNM  = cv::text::OCRHMMDecoder::create(hmm, voc, 
-    transition_probabilities, emission_probabilities, cv::text::OCR_DECODER_VITERBI);
-
-    ocrNM->run(image, output_text, boxes, words, confidences, cv::text::OCR_LEVEL_TEXTLINE);
-
-    return 0;
-
-}
-
-
-  char const* greet()
-  {
-    return "hello, world";
-  }
-
-class TextDetection
+class TextDetection 
 {
 public:
   TextDetection(np::ndarray src) {
@@ -229,33 +199,6 @@ vector<cv::Ptr<cv::text::ERFilter>> cb_vector) {
     RunFilters(channels, groups, groups_rects, cb_vector);
   }
 
-  boost::python::tuple TextRecognition_HMMDecode() {
-
-    std::string output_text;
-    vector<string> words;
-    vector<float> confidences;
-    vector<cv::Rect> boxes;
-    
-    vector<vector<cv::Rect>> boxes_array;
-    vector<std::string> output_text_array;
-    vector<vector<float>> confidences_array;
-
-    std::vector<cv::Mat> images = extractImage(image, groups_rects);
-
-    for(int i = 0; i < images.size(); i++) {
-      obtainHMMDecoder(images[i], OCRHMM_KNN_MODEL, output_text, &boxes, &words, &confidences, OCRHMM_TRANSITIONS_TABLE);
-      output_text_array.push_back(output_text);
-      boxes_array.push_back(boxes);
-      confidences_array.push_back(confidences);
-    }
-
-    if (!groups_rects.empty()) {
-        groups_rects.clear();
-    }
-
-    return boost::python::make_tuple(output_text_array, confidences_array, boxes_array);
-  }
-
   private:
     cv::Mat image;
     cv::Ptr<cv::text::ERFilter> filterStage1;
@@ -277,8 +220,7 @@ BOOST_PYTHON_MODULE(libmain) {
 
   bp::class_<TextDetection>("TextDetection")
       .def(bp::init<np::ndarray>())
-      .def("Run_Filters", &TextDetection::Run_Filters)
-      .def("HMMDecode", &TextDetection::TextRecognition_HMMDecode);
+      .def("Run_Filters", &TextDetection::Run_Filters);
 
   import_array1();
 
