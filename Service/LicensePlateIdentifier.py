@@ -24,7 +24,6 @@ class LicensePlateIdentifier():
         i = 0
         plates = []
         confidences = []
-        print(self.results['vehicle_region'])
         for plate in self.results['results']:
             i += 1
             for candidate in plate['candidates']:
