@@ -47,6 +47,11 @@
 using namespace std;
 using namespace cv;
 
+namespace bp = boost::python;
+namespace np = boost::python::numpy;
+
+typedef cv::Mat3f Ttype;
+
 #include  <vector>
 #include  <iostream>
 #include  <iomanip>
@@ -63,31 +68,8 @@ namespace np = boost::python::numpy;
 #define OCRHMM_KNN_MODEL "./OCRHMM_knn_model_data.xml.gz"
 #define OCRHMM_TRANSITIONS_TABLE "./OCRHMM_transitions_table.xml"
 
-int obtainBeamSearchDecoder(cv::Mat image, const cv::String& filename, std::string& output_text, 
-    vector<cv::Rect>* boxes, vector<string>* words, vector<float>* confidences) {
-
-  // character recognition vocabulary
-  cv::String voc = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  cv::Mat transition_probabilities;
-  cv::Mat emission_probabilities = cv::Mat::eye((int)voc.size(), (int)voc.size(), CV_64FC1);
-  cv::FileStorage fs(OCRHMM_TRANSITIONS_TABLE, cv::FileStorage::READ);
-  fs["transition_probabilities"] >> transition_probabilities;
-  fs.release();
-
-  cv::Ptr<OCRHMMDecoder::ClassifierCallback> hmm =  loadOCRBeamSearchClassifierCNN(filename);
-  
-  cv::Ptr<OCRBeamSearchDecoder> ocr = OCRBeamSearchDecoder::create(hmm,
-      voc, transition_probabilities, emission_p, OCR_DECODER_VITERBI, 50);
-
-  ocr->run(image, output_text, &boxes, &words, &confidences, OCR_LEVEL_WORD);
-
-  return 0;
-}
-
-
-class TextDetection
+class TextDetection 
 {
-
 public:
   TextDetection(np::ndarray src) {
     np::ndarray nd = np::array(src);
@@ -96,9 +78,22 @@ public:
     
     boostPythonObject2Mat(nd, rows, cols);
 
+    ChanneliseFilters();
   }
   TextDetection() {}
   ~TextDetection() {}
+
+  cv::Ptr<cv::text::ERFilter> getFilterStage1() {
+    return filterStage1;
+  }
+
+  cv::Ptr<cv::text::ERFilter> getFilterStage2() {
+    return filterStage2;
+  }
+
+  vector<cv::Mat> getChannels() {
+    return channels;
+  }
 
   void boostPythonObject2Mat(np::ndarray nd, int rows, int cols) {
     image = cv::Mat(rows, cols, CV_8UC3);
@@ -114,21 +109,104 @@ public:
     }
   }
 
-  boost::python::tuple Beam_Search()
-  {
-    const cv::String filename;
-    std::string& output_text;
-    vector<cv::Rect>* boxes;
-    vector<string>* words;
-    vector<float>* confidences;
-    obtainBeamSearchDecoder(image, filename, output_text, boxes, words, confidences);
+  std::vector<cv::Mat> extractImage(cv::Mat image, std::vector<cv::Rect> groups_rects) {
+    std::vector<cv::Mat> all_boxes(groups_rects.size());
 
-    return boost::python::make_tuple(output_text,boxes,confidences);
+    int x, y, width, height;
+    for(int i = 0; i < groups_rects.size(); i++) {
+      x = groups_rects[i].x;
+      y = groups_rects[i].y;
+      width = groups_rects[i].width;
+      height = groups_rects[i].height;
+      all_boxes[i] = cv::Mat(height, width, image.type());
+      for(int j = x; j < (x+width); j++) {
+        for(int k = y; k < (y+height); k++) {
+          all_boxes[i].at<cv::Vec3b>(j-x,k-y)[0] = image.at<cv::Vec3b>(j,k)[0];
+          all_boxes[i].at<cv::Vec3b>(j-x,k-y)[1] = image.at<cv::Vec3b>(j,k)[1];
+          all_boxes[i].at<cv::Vec3b>(j-x,k-y)[2] = image.at<cv::Vec3b>(j,k)[2];
+        }
+      }
+    }
   }
 
-private:
-    cv::Mat image;
+  vector<cv::Mat> createChannels(cv::Mat src) {
+    vector<cv::Mat> channels;
+    cv::text::computeNMChannels(src, channels, cv::text::ERFILTER_NM_IHSGrad);
+    cv::Mat expr;
+    size_t length = channels.size();
+    // preprocess channels to include black and the degree of hue factor
+    for(size_t i = 0; i < length-1; i++) {
+        expr = channels[i].mul(-1);
+        cv::Mat full = cv::Mat::ones(channels[i].size(), channels[i].type()) * 255;
+        channels.push_back(full + expr);
+    }
+    return channels;
+  }
 
+  virtual cv::Ptr<cv::text::ERFilter> obtainFilterStage1(const cv::String& filename, 
+        int thresholdDelta = 16, float minArea = (float)0.00015,
+        float maxArea = (float)0.13, float minProbability = (float)0.2, 
+        bool nonMaxSuppression = true, float minProbabilityDiff = (float)0.1) {
+    cb1 = cv::text::loadClassifierNM1(filename);
+    return cv::text::createERFilterNM1(cb1,thresholdDelta,minArea,maxArea,minProbability,nonMaxSuppression,minProbabilityDiff);
+  }
+
+  virtual cv::Ptr<cv::text::ERFilter> obtainFilterStage2(const cv::String& filename, float minProbability = (float)0.5) {
+    cb2 = cv::text::loadClassifierNM2(filename);
+    return cv::text::createERFilterNM2(cb2,minProbability);
+  }
+
+  void ChanneliseFilters() {
+    channels = createChannels(image);
+    filterStage1 = obtainFilterStage1(NM1_CLASSIFIER);
+    filterStage2 = obtainFilterStage2(NM2_CLASSIFIER);
+  }
+
+  int runFilter(vector<cv::Ptr<cv::text::ERFilter>>cb_vector, cv::Mat src, vector<cv::Mat> channels, 
+    vector<vector<cv::text::ERStat>> &regions, vector<vector<cv::Vec2i> > &groups, vector<cv::Rect> groups_rects) {
+    for(int j = 0; j < cb_vector.size(); j++) {
+        for(int i = 0; i < channels.size(); i++) {
+            cb_vector[j]->run(channels[i], regions[i]);
+        }
+    }
+
+    // cv::text::erGrouping(src, channels, regions, groups, groups_rects, cv::text::ERGROUPING_ORIENTATION_HORIZ;
+
+    // memory clean-up
+    for(int j = 0; j < cb_vector.size(); j++) {
+        cb_vector[j].release();
+    }
+
+    return 0;
+  }
+
+  void RunFilters(vector<cv::Mat> channels, vector<vector<cv::Vec2i>> groups, vector<cv::Rect> groups_rects, 
+vector<cv::Ptr<cv::text::ERFilter>> cb_vector) {
+
+    vector<vector<cv::text::ERStat>> regions(channels.size());
+    runFilter(cb_vector, image, channels, regions, groups, groups_rects);
+
+    printf("Rect: %d", groups_rects.size());
+
+    regions.clear();
+  }
+
+  void Run_Filters()
+  {
+    vector<vector<cv::Vec2i>> groups;
+
+    vector<cv::Ptr<cv::text::ERFilter>> cb_vector { getFilterStage1(), getFilterStage2() };
+    RunFilters(channels, groups, groups_rects, cb_vector);
+  }
+
+  private:
+    cv::Mat image;
+    cv::Ptr<cv::text::ERFilter> filterStage1;
+    cv::Ptr<cv::text::ERFilter> filterStage2;
+    cv::Ptr<cv::text::ERFilter::Callback> cb1;
+    cv::Ptr<cv::text::ERFilter::Callback> cb2;
+    vector<cv::Mat> channels;
+    vector<cv::Rect> groups_rects;
 };
 
 BOOST_PYTHON_MODULE(libmain) {
@@ -142,8 +220,7 @@ BOOST_PYTHON_MODULE(libmain) {
 
   bp::class_<TextDetection>("TextDetection")
       .def(bp::init<np::ndarray>())
-      .def("Run_Filters", &TextDetection::Run_Filters)
-      .def("BeamSearchDecode", &TextDetection::Beam_Search);
+      .def("Run_Filters", &TextDetection::Run_Filters);
 
   import_array1();
 

@@ -1,0 +1,9 @@
+version: '3'
+services:
+  openalpr:
+    build: .
+    container_name: openalpr
+    ports:
+      - "5679:5678"
+    volumes:
+      - .:/home/dashcam

@@ -7,6 +7,7 @@ from mpi4py.futures import MPIPoolExecutor
 import NetworkService
 from Vehicle import VehicleDetection
 from Service import VideoCapture
+from VideoCapture import VideoCapture
 import pdb
 
 LIB_TEXT_DETECTION = "./libs/text_detection.so"
@@ -22,7 +23,7 @@ if os.path.isfile(LIB_TEXT_DETECTION):
     from libs import text_detection as text
 
 frame = cv2.imread("image.png")
-print(frame.shape)
+# print(frame.shape)
 
 alpr_detect = libalpr.ALPRImageDetect(frame)
 alpr_detect.Attributes(os.path.join(os.path.abspath("./ALPR"), libalpr.config),
